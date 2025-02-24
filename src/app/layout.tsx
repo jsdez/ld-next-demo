@@ -1,3 +1,4 @@
+import { LDProvider } from 'launchdarkly-react-client-sdk';  // Correct import
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -22,12 +23,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const sdkKey = process.env.LD_SDK_KEY || '';  // Accessing the correct environment variable
+
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Wrapping the children with LDProvider to enable feature flagging */}
+        <LDProvider clientSideID={sdkKey}>
+          {children}
+        </LDProvider>
       </body>
     </html>
   );
