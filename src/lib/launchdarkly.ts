@@ -1,6 +1,6 @@
 import { withLDProvider } from 'launchdarkly-react-client-sdk';
 
-const ldClientSideId = process.env.NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_ID || '';
+const ldClientSideId = process.env.LD_SDK_KEY || '';
 
 export const LDProvider = withLDProvider({
   clientSideID: ldClientSideId,
