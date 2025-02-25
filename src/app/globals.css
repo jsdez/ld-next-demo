@@ -12,6 +12,7 @@
   --button-text: #000000;
   --link-text: #000000;
   --link-hover: #333333;
+  --radius: 0.5rem;
 }
 
 /* Dark Mode */
@@ -74,6 +75,67 @@ button:hover {
   color: var(--button-text);
 }
 
+/* Chatbot Styles */
+.chatbot-wrapper {
+  position: fixed;
+  bottom: 6rem;
+  right: 6rem;
+  z-index: 50;
+}
+
+.dialog-trigger-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 9999px;
+  padding: 1rem;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.dialog-trigger-button:hover {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+}
+
+.dialog-content {
+  background-color: var(--card-bg);
+  color: var(--foreground);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 24rem;
+  width: 100%;
+}
+
+.dialog-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.dialog-body {
+  height: 20rem;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.dialog-input {
+  margin-top: 1rem;
+}
+
+textarea {
+  width: calc(100% - 2.5rem);
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #ddd;
+  resize: none;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--button-bg);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .text-lg {
@@ -90,5 +152,16 @@ button:hover {
 
   .max-w-xl {
     max-width: 100%;
+  }
+}
+
+@layer base {}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

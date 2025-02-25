@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
+import { UserProvider } from "../context/UserContext";
 
 export const metadata: Metadata = {
   title: "ABC Company",
@@ -13,8 +14,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Header />
-        {children}
+        {/* Wrap the entire app with UserProvider */}
+        <UserProvider>
+          <Header />
+          {children} {/* This will be handled in page.tsx for user context */}
+        </UserProvider>
       </body>
     </html>
   );

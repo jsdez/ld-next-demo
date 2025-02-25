@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeToggle from "./ThemeToggle"; // Import ThemeToggle component
+import { useUserContext } from "../context/UserContext"; // Import the useUserContext hook
 
 export default function Header() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -14,6 +15,8 @@ export default function Header() {
     return "light";
   });
 
+  const { user, login, logout, setGroup } = useUserContext(); // Access user context and functions
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
@@ -21,6 +24,12 @@ export default function Header() {
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
+
+  const toggleGroup = () => {
+    if (user) {
+      setGroup(user.group === "user" ? "admin" : "user");
+    }
   };
 
   return (
@@ -36,8 +45,35 @@ export default function Header() {
           />
         </div>
 
-        {/* Use the ThemeToggle component */}
+        {/* Header Controls */}
         <div className="ml-auto flex gap-2">
+          {/* Login/Logout Button */}
+          {user ? (
+            <button
+              onClick={logout}
+              className="bg-blue-500 text-white p-2 rounded-md"
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              onClick={() => login("John Doe")}
+              className="bg-green-500 text-white p-2 rounded-md"
+            >
+              Login
+            </button>
+          )}
+
+          {/* Toggle User/Admin Group */}
+          {user && (
+            <button
+              onClick={toggleGroup}
+              className="bg-gray-500 text-white p-2 rounded-md"
+            >
+              {user.group === "user" ? "Switch to Admin" : "Switch to User"}
+            </button>
+          )}
+          {/* Theme Toggle */}
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </div>
       </header>
