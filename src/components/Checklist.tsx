@@ -22,8 +22,8 @@ const Checklist = ({ onComplete }: ChecklistProps) => {
     { id: 3, text: "Reverse the changes to turn off the chat bot", checked: false },
     { id: 4, text: "Implement the feature flag that enables theme change based on user role", checked: false },
     { id: 5, text: "Switch user roles to show the the feature appearing in context", checked: false },
-    { id: 6, text: "Show the metric of which theme is more preferred", checked: false },
-    { id: 7, text: "Demonstrate the intrgration with Vercel", checked: false },
+    { id: 6, text: "Demonstrate the integration with vscode", checked: false },
+    { id: 7, text: "Show the metric of which theme is more preferred", checked: false },
     { id: 8, text: "Show the metric on how long it took to complete this checklist", checked: false },
   ]);
 
