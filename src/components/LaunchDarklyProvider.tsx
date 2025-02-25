@@ -1,57 +1,37 @@
-"use client";
+import { useState, useEffect, ReactNode } from "react";
+import { asyncWithLDProvider } from "launchdarkly-react-client-sdk";
+import { useUserContext } from "@/context/UserContext";
 
-import { useEffect, useState, useRef } from "react";
-import { LDProvider, useLDClient } from "launchdarkly-react-client-sdk"; // Import useLDClient hook
-import { useUserContext } from "../context/UserContext";
+const clientSideID = process.env.NEXT_PUBLIC_CLIENT_SIDE_ID || ""; // Ensure it's defined in .env.local
 
-const clientSideID = "67bc6700fb286d0bef6fb3a4";
+interface LaunchDarklyWrapperProps {
+  children: ReactNode;
+}
 
-export default function LaunchDarklyProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useUserContext();
-  const [context, setContext] = useState({
-    kind: "user",
-    key: "anonymous",
-    email: "anonymous@unknown.com",
-    group: "user",
-  });
-
-  const contextRef = useRef(context); // Use ref to store the context
-  const ldClient = useLDClient(); // Access LaunchDarkly client
+export default function LaunchDarklyProvider({ children }: LaunchDarklyWrapperProps) {
+  const { user } = useUserContext(); // Get user from context
+  const [LDProvider, setLDProvider] = useState<ReactNode | null>(null);
 
   useEffect(() => {
-    // Ensure context updates when user state changes
-    const updatedContext = user
-      ? {
-          kind: "user",
-          key: "anonymous",
-          email: `${user.name}@ABCcompany.com`,
-          group: user.group,
-        }
-      : {
-          kind: "user",
-          key: "anonymous",
-          email: "anonymous@unknown.com",
-          group: "user",
-        };
+    const initializeLD = async () => {
+      const LD = await asyncWithLDProvider({
+        clientSideID,
+        context: user
+          ? {
+              kind: "user",
+              key: user.name.toLowerCase().replace(/\s+/g, "-"),
+              name: user.name,
+              group: user.group,
+            }
+          : { kind: "anonymous", key: "anonymous" },
+        options: { bootstrap: "localStorage" }, // Can use "none" if real-time updates are needed
+      });
 
-    // Log context sent to LaunchDarkly
-    console.log("Sending context to LaunchDarkly:", updatedContext);
+      setLDProvider(<LD>{children}</LD>); // Store the dynamically loaded provider
+    };
 
-    // Ensure context updates properly
-    if (ldClient) {
-      ldClient.identify(updatedContext); // Update context for LaunchDarkly
-      console.log("LaunchDarkly context updated:", updatedContext);
-    }
+    initializeLD();
+  }, [user, children]); // Re-run when user context or children changes
 
-    // Update context and trigger re-render
-    setContext(updatedContext);
-    contextRef.current = updatedContext; // Keep ref up-to-date
-  }, [user, ldClient]); // Re-run when user changes or ldClient is available
-
-  // Log the current context whenever it changes
-  useEffect(() => {
-    console.log("Current context:", context);
-  }, [context]);
-
-  return <LDProvider clientSideID={clientSideID} context={context}>{children}</LDProvider>;
+  return LDProvider || <p>Loading feature flags...</p>; // Avoid rendering null
 }

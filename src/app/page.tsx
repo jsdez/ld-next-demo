@@ -27,14 +27,16 @@ export default function Home() {
     if (startTime && ldClient) {
       const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
       setCompletedTime(elapsedTime);
-
-      // Send the custom event to LaunchDarkly
-      ldClient.track('time_to_complete_checklist', {
+  
+      // Send the event to LaunchDarkly with the correct event key
+      ldClient.track('time-to-complete-checklist-seconds', {
         value: elapsedTime,
+        userName: user?.name,  // Optional: Include the user's name for tracking purposes
+        userGroup: user?.group, // Optional: Include the user's group (admin/user)
       });
     }
   };
-
+  
   if (!user) {
     return (
       <main className="flex flex-col items-center justify-center w-full h-full bg-transparent dark:bg-gray-900 transition-all duration-300 ease-in-out">
