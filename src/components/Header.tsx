@@ -1,10 +1,10 @@
-// components/Header.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeToggle from "./ThemeToggle"; // Import ThemeToggle component
 import { useUserContext } from "../context/UserContext"; // Import the useUserContext hook
+import { useFlags } from "launchdarkly-react-client-sdk"; // Import the useFlags hook from LaunchDarkly
 
 export default function Header() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -15,9 +15,21 @@ export default function Header() {
     return "light";
   });
 
-  const { user, login, logout, setGroup } = useUserContext(); // Access user context and functions
+  const { user, login, logout } = useUserContext(); // Access user context and functions
+  const { enableTheme } = useFlags(); // Get the feature flag for enabling the theme toggle
 
+  // Log context changes for debugging
   useEffect(() => {
+    if (user) {
+      console.log(`User context updated: ${user.name} - Group: ${user.group}`);
+    } else {
+      console.log("No user logged in.");
+    }
+  }, [user]); // Trigger on user change
+
+  // Log theme changes for debugging
+  useEffect(() => {
+    console.log(`Theme updated: ${theme}`);
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
@@ -26,10 +38,13 @@ export default function Header() {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
-  const toggleGroup = () => {
-    if (user) {
-      setGroup(user.group === "user" ? "admin" : "user");
-    }
+  // Handle login as admin or user
+  const handleLoginAsAdmin = () => {
+    login("Admin User", "admin"); // Pass group as "admin"
+  };
+
+  const handleLoginAsUser = () => {
+    login("Regular User", "user"); // Pass group as "user"
   };
 
   return (
@@ -47,34 +62,37 @@ export default function Header() {
 
         {/* Header Controls */}
         <div className="ml-auto flex gap-2">
-          {/* Login/Logout Button */}
-          {user ? (
+          {/* Login as Admin or User */}
+          {!user ? (
+            <>
+              <button
+                onClick={handleLoginAsAdmin}
+                className="bg-blue-500 text-white p-2 rounded-md"
+              >
+                Login as Admin
+              </button>
+
+              <button
+                onClick={handleLoginAsUser}
+                className="bg-green-500 text-white p-2 rounded-md"
+              >
+                Login as User
+              </button>
+            </>
+          ) : (
+            // Show logout button when user is logged in
             <button
               onClick={logout}
-              className="bg-blue-500 text-white p-2 rounded-md"
+              className="bg-red-500 text-white p-2 rounded-md"
             >
               Logout
             </button>
-          ) : (
-            <button
-              onClick={() => login("John Doe")}
-              className="bg-green-500 text-white p-2 rounded-md"
-            >
-              Login
-            </button>
           )}
 
-          {/* Toggle User/Admin Group */}
-          {user && (
-            <button
-              onClick={toggleGroup}
-              className="bg-gray-500 text-white p-2 rounded-md"
-            >
-              {user.group === "user" ? "Switch to Admin" : "Switch to User"}
-            </button>
+          {/* Conditionally render Theme Toggle based on feature flag */}
+          {enableTheme && (
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           )}
-          {/* Theme Toggle */}
-          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </div>
       </header>
     </div>

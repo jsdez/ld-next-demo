@@ -1,13 +1,39 @@
 // app/page.tsx
 
-"use client";  // Important: This ensures it's a client-side component
+"use client";
 
 import { useUserContext } from "../context/UserContext"; // Import the UserContext hook
 import Checklist from "@/components/Checklist"; // Import the Checklist component
 import Chatbot from "@/components/Chatbot";
+import { useFlags, useLDClient } from "launchdarkly-react-client-sdk"; // Import necessary hooks from LaunchDarkly
+import { useState, useEffect } from "react"; // For tracking time
 
 export default function Home() {
   const { user } = useUserContext();  // Access the user context
+  const { enableChatbot } = useFlags();  // Get the feature flag for enabling the chatbot
+  const ldClient = useLDClient(); // Access the LDClient
+  const [startTime, setStartTime] = useState<number | null>(null);  // Track start time
+  const [completedTime, setCompletedTime] = useState<number | null>(null); // Track completion time
+
+  // Start tracking time once the user is logged in
+  useEffect(() => {
+    if (user) {
+      setStartTime(Date.now()); // Record start time when the user logs in
+    }
+  }, [user]);
+
+  // This function can be called once all checkboxes are checked
+  const handleChecklistCompletion = () => {
+    if (startTime && ldClient) {
+      const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
+      setCompletedTime(elapsedTime);
+
+      // Send the custom event to LaunchDarkly
+      ldClient.track('time_to_complete_checklist', {
+        value: elapsedTime,
+      });
+    }
+  };
 
   if (!user) {
     return (
@@ -35,9 +61,21 @@ export default function Home() {
       {/* Checklist Section */}
       <section className="mt-8 p-4 rounded-lg max-w-2xl w-full">
         <h3 className="text-xl font-semibold mb-4">Presentation Checklist</h3>
-        <Checklist />
+        <Checklist onComplete={handleChecklistCompletion} />
       </section>
-      <Chatbot />
+      {/* Conditionally render the Chatbot based on the feature flag */}
+      {enableChatbot ? (
+        <Chatbot />
+      ) : (
+        ''
+      )}
+      
+      {/* Display the completed time if available */}
+      {completedTime !== null && (
+        <div className="mt-4 text-lg">
+          <p>Time to complete the checklist: {completedTime.toFixed(2)} seconds</p>
+        </div>
+      )}
     </main>
   );
 }

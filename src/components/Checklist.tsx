@@ -1,11 +1,22 @@
 // components/Checklist.tsx
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const Checklist = () => {
-  const [items, setItems] = useState([
+interface ChecklistItem {
+  id: number;
+  text: string;
+  checked: boolean;
+}
+
+interface ChecklistProps {
+  onComplete: () => void;  // Add the onComplete prop
+}
+
+const Checklist = ({ onComplete }: ChecklistProps) => {
+  const [items, setItems] = useState<ChecklistItem[]>([
     { id: 1, text: "Turn on the feature flag to enable the chat bot", checked: false },
     { id: 2, text: "Test to make sure the chat bot feature works", checked: false },
     { id: 3, text: "Reverse the changes to turn off the chat bot", checked: false },
@@ -15,6 +26,13 @@ const Checklist = () => {
     { id: 7, text: "Demonstrate the intrgration with Vercel", checked: false },
     { id: 8, text: "Show the metric on how long it took to complete this checklist", checked: false },
   ]);
+
+  useEffect(() => {
+    // Check if all checkboxes are checked, then call onComplete
+    if (items.every(item => item.checked)) {
+      onComplete();  // Call the onComplete function passed as a prop
+    }
+  }, [items, onComplete]);  // Re-run this effect whenever items change
 
   const handleCheck = (id: number) => {
     setItems((prevItems) =>

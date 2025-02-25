@@ -1,12 +1,10 @@
-// context/UserContext.tsx
-
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface UserContextType {
   user: { name: string; group: "user" | "admin" } | null;
-  login: (name: string) => void;
+  login: (name: string, group: "user" | "admin") => void;
   logout: () => void;
   setGroup: (group: "user" | "admin") => void;
 }
@@ -16,8 +14,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<{ name: string; group: "user" | "admin" } | null>(null);
 
-  const login = (name: string) => {
-    setUser({ name, group: "user" });  // Default group is "user"
+  const login = (name: string, group: "user" | "admin") => {
+    setUser({ name, group });  // Ensure both name and group are set properly
   };
 
   const logout = () => {
@@ -32,7 +30,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }));
     }
   };
-  
 
   return (
     <UserContext.Provider value={{ user, login, logout, setGroup }}>
