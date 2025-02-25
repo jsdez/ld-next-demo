@@ -3,31 +3,92 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default (Light Mode) */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #333333;
+  --card-bg: #ffffff;
+  --button-bg: #e5e7eb;
+  --button-text: #000000;
+  --link-text: #000000;
+  --link-hover: #333333;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark Mode */
+[data-theme="dark"] {
+  --background: #1a1a1a;
+  --foreground: #ededed;
+  --card-bg: #1a1a1a;
+  --button-bg: #374151;
+  --button-text: #ffffff;
+  --link-text: #ffffff;
+  --link-hover: #cccccc;
 }
 
 body {
+  background-color: var(--background);
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease-in-out; /* Removed text color transition */
 }
 
-html[data-theme="light"] {
-  --background: #ffffff;
-  --foreground: #171717;
+main {
+  background-color: var(--background);
+  transition: background-color 0.3s ease-in-out;
 }
 
-html[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+/* Card Style */
+.theme-card {
+  background-color: var(--card-bg);
+  color: var(--foreground);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: none;
 }
 
+/* Button Style */
+.theme-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  transition: background 0.3s ease-in-out;
+}
+
+/* Styling Links */
+a {
+  color: var(--link-text);
+  /* Removed transition for color */
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+/* Styling Buttons */
+button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  transition: background-color 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .text-lg {
+    font-size: 1.25rem;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .max-w-lg {
+    max-width: 100%;
+  }
+
+  .max-w-xl {
+    max-width: 100%;
+  }
+}
