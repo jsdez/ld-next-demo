@@ -3,8 +3,8 @@
 "use client";
 
 import { useUserContext } from "../context/UserContext"; // Import the UserContext hook
-import Checklist from "@/components/Checklist"; // Import the Checklist component
-import Chatbot from "@/components/Chatbot";
+import Checklist from "@/components/features/checklist/Checklist"; // Import the Checklist component
+import Chatbot from "@/components/features/chatbot/Chatbot";
 import { useFlags, useLDClient } from "launchdarkly-react-client-sdk"; // Import necessary hooks from LaunchDarkly
 import { useState, useEffect } from "react"; // For tracking time
 

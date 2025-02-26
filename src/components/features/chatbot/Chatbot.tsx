@@ -1,22 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button"; // Assuming Button is already imported
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, Send, User, Bot } from "lucide-react";
-import { Card } from "@/components/ui/card"; // Import the Card component
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"; // Import Alert components
+import { Card } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 const Chatbot = () => {
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [chatHistory, setChatHistory] = useState<string[]>([]);
+    const { trackEvent } = useFeatureFlags();
 
     const handleSendMessage = () => {
         if (message.trim()) {
+            // Add message to chat history
             setChatHistory([...chatHistory, `You: ${message}`, `Bot: "unknown:error"`]);
+            
+            // Track event in LaunchDarkly
+            trackEvent("chatbot-message-sent", {
+                messageLength: message.length,
+                timestamp: new Date().toISOString()
+            });
+            
             setMessage(""); // Clear input after sending
         }
+    };
+
+    const handleToggle = () => {
+        setOpen(!open);
+        trackEvent("chatbot-toggled", { isOpen: !open });
     };
 
     return (
@@ -25,7 +40,7 @@ const Chatbot = () => {
             <Button
                 variant="outline"
                 className="bg-blue-500 text-white rounded-full p-5"
-                onClick={() => setOpen(!open)}
+                onClick={handleToggle}
             >   Chat Bot
                 <MessageCircle className="w-20 h-20 text-white" />
             </Button>

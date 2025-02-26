@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import ThemeToggle from "./ThemeToggle"; // Import ThemeToggle component
-import { useUserContext } from "../context/UserContext"; // Import the useUserContext hook
+import ThemeToggle from "../theme/ThemeToggle"; // Import ThemeToggle component
+import { useUserContext } from "src/context/UserContext"; // Import the useUserContext hook
 import { useFlags } from "launchdarkly-react-client-sdk"; // Import the useFlags hook from LaunchDarkly
 
 export default function Header() {

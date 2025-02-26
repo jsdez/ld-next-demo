@@ -1,9 +1,9 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { UserProvider } from "../context/UserContext"; // Wrap app with user context
-import ClientSideWrapper from "../components/ClientSideWrapper"; // Wrap with LaunchDarklyProvider
+import ClientSideWrapper from "../lib/feature-flags/LaunchDarklyWrapper"; // Wrap with LaunchDarklyProvider
 
 export const metadata: Metadata = {
   title: "ABC Company",
