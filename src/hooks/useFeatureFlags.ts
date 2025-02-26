@@ -15,14 +15,14 @@ export function useFeatureFlags() {
   const ldClient = useLDClient();
   
   // Track events with consistent structure
-  const trackEvent = useCallback((eventName: string, data?: Record<string, any>) => {
+  const trackEvent = useCallback((eventName: string, data?: Record<string, unknown>) => {
     if (ldClient) {
       ldClient.track(eventName, data);
     }
   }, [ldClient]);
   
   // Function to track time-based metrics
-  const trackTimeMetric = useCallback((metricName: string, valueInSeconds: number, metadata?: Record<string, any>) => {
+  const trackTimeMetric = useCallback((metricName: string, valueInSeconds: number, metadata?: Record<string, unknown>) => {
     if (ldClient) {
       ldClient.track(metricName, {
         value: valueInSeconds,
