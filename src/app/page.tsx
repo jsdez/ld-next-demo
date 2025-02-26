@@ -1,24 +1,28 @@
 // app/page.tsx
-
 "use client";
 
-import { useUserContext } from "../context/UserContext"; // Import the UserContext hook
-import Checklist from "@/components/features/checklist/Checklist"; // Import the Checklist component
+import { useUserContext } from "../context/UserContext";
+import Checklist from "@/components/features/checklist/Checklist";
 import Chatbot from "@/components/features/chatbot/Chatbot";
-import { useFlags, useLDClient } from "launchdarkly-react-client-sdk"; // Import necessary hooks from LaunchDarkly
-import { useState, useEffect } from "react"; // For tracking time
+import { useFlags, useLDClient } from "launchdarkly-react-client-sdk";
+import { useState, useEffect } from "react";
+import { useLaunchDarklyIdentify } from "@/hooks/useLaunchDarklyIdentify"; // Import the new hook
 
 export default function Home() {
-  const { user } = useUserContext();  // Access the user context
-  const { enableChatbot } = useFlags();  // Get the feature flag for enabling the chatbot
-  const ldClient = useLDClient(); // Access the LDClient
-  const [startTime, setStartTime] = useState<number | null>(null);  // Track start time
-  const [completedTime, setCompletedTime] = useState<number | null>(null); // Track completion time
+  const { user } = useUserContext();
+  const { enableChatbot } = useFlags();
+  const ldClient = useLDClient();
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [completedTime, setCompletedTime] = useState<number | null>(null);
+  
+  // Use the identify hook to ensure LD context is updated
+  useLaunchDarklyIdentify();
 
   // Start tracking time once the user is logged in
   useEffect(() => {
     if (user) {
-      setStartTime(Date.now()); // Record start time when the user logs in
+      setStartTime(Date.now());
+      console.log("Started tracking time for user:", user.name);
     }
   }, [user]);
 
@@ -28,11 +32,13 @@ export default function Home() {
       const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
       setCompletedTime(elapsedTime);
   
+      console.log(`Tracking completion time: ${elapsedTime}s for user: ${user?.name}`);
+      
       // Send the event to LaunchDarkly with the correct event key
       ldClient.track('time-to-complete-checklist-seconds', {
         value: elapsedTime,
-        userName: user?.name,  // Optional: Include the user's name for tracking purposes
-        userGroup: user?.group, // Optional: Include the user's group (admin/user)
+        userName: user?.name,
+        userGroup: user?.group,
       });
     }
   };

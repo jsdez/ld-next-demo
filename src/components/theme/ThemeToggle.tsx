@@ -1,7 +1,8 @@
 "use client";
 
 import { Sun, Moon } from "lucide-react";
-import { useLDClient } from "launchdarkly-react-client-sdk"; // Import the hook for LaunchDarkly client
+import { useLDClient } from "launchdarkly-react-client-sdk";
+import { useEffect } from "react";
 
 interface ThemeToggleProps {
   theme: "light" | "dark";
@@ -9,23 +10,49 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
-  const ldClient = useLDClient(); // Access the LDClient
+  const ldClient = useLDClient();
+
+  // Track initial theme on component mount
+  useEffect(() => {
+    if (ldClient) {
+      ldClient.track("theme-selection", {
+        themeSelected: theme,
+        eventType: "initial_load",
+        value: 1  // For custom numeric metrics
+      });
+    }
+  }, [ldClient, theme]);
 
   // Handle theme toggle click
   const handleClick = () => {
-    toggleTheme(); // Toggle the theme
+    // Calculate the new theme that will be set after toggle
+    const newTheme = theme === "light" ? "dark" : "light";
+    
+    // Toggle the theme in the UI
+    toggleTheme();
 
-    // Use the SDK's client.track() to emit the event to LaunchDarkly
+    // Track the click event as a custom count metric
     if (ldClient) {
-      ldClient.track("clicktracker", { 
-        target: "btn-toggle-theme",  // You can also pass other properties if needed
+      // Track the toggle action
+      ldClient.track("themeclicktracker", { 
+        buttonId: "btn-toggle-theme",
+        fromTheme: theme,
+        toTheme: newTheme,
+        value: 1  // For count-based metrics, add a numeric value
+      });
+      
+      // Also track which theme was selected for more detailed analysis
+      ldClient.track("theme-selection", {
+        themeSelected: newTheme, 
+        eventType: "user_toggle",
+        value: 1
       });
     }
   };
 
   return (
     <button
-      onClick={handleClick}  // Call the new click handler
+      onClick={handleClick}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
       className={`btn-toggle-theme rounded-full p-3 focus:outline-none focus:ring-0 ${
         theme === "light" ? "bg-gray-200 text-gray-800" : "bg-gray-700 text-white"

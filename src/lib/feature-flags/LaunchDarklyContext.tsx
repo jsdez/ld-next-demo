@@ -11,15 +11,17 @@ interface LaunchDarklyContextProps {
 
 export default function LaunchDarklyContext({ children }: LaunchDarklyContextProps) {
   const { user } = useUserContext();
-  const [LDProvider, setLDProvider] = useState<ReactNode | null>(null);
+  const [LDProvider, setLDProvider] = useState<React.ComponentType<{ children: ReactNode }> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const initializeLD = async () => {
       setIsLoading(true);
       
       try {
-        // Configure user context for LaunchDarkly
+        // Configure user context for LaunchDarkly - with fallback
         const userContext = user
           ? {
               kind: "user",
@@ -27,31 +29,45 @@ export default function LaunchDarklyContext({ children }: LaunchDarklyContextPro
               name: user.name,
               group: user.group,
             }
-          : { kind: "anonymous", key: "anonymous" };
+          : { 
+              kind: "anonymous", 
+              key: "anonymous-user-" + Date.now().toString(),
+              anonymous: true
+            };
             
-        const LD = await asyncWithLDProvider({
+        const LDProvider = await asyncWithLDProvider({
           clientSideID,
           context: userContext,
           options: { 
             bootstrap: "localStorage",
-            streaming: true // Enable real-time updates
+            streaming: true,
+            sendEvents: true,
           },
         });
 
-        setLDProvider(<LD>{children}</LD>);
+        if (isMounted) {
+          setLDProvider(() => LDProvider);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error("Failed to initialize LaunchDarkly:", error);
-      } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeLD();
-  }, [user, children]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.name, user?.group]); 
 
-  if (isLoading) {
+  if (isLoading || !LDProvider) {
     return <div className="flex items-center justify-center p-4">Loading feature flags...</div>;
   }
 
-  return LDProvider || <div>Failed to load feature flags</div>;
+  const Provider = LDProvider;
+  return <Provider>{children}</Provider>;
 }

@@ -11,34 +11,53 @@ interface UserContextType {
   user: User | null;
   login: (name: string, group: "admin" | "user") => void;
   logout: () => void;
+  isLoading: boolean; // Add loading state
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // Track if we're still loading user data
 
-  // Rehydrate user from localStorage on initial load
+  // Safely access localStorage only on client side
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Only run on client
+    setIsLoading(true);
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (e) {
+      console.error("Failed to parse stored user:", e);
+      localStorage.removeItem("user");
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   const login = (name: string, group: "admin" | "user") => {
     const newUser = { name, group };
     setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser));
+    // Safely access localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("user", JSON.stringify(newUser));
+    }
+    console.log(`User logged in: ${name} (${group})`);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    // Safely access localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("user");
+    }
+    console.log("User logged out");
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </UserContext.Provider>
   );
