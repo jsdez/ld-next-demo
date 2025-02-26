@@ -16,12 +16,11 @@ export default function LaunchDarklyContext({ children }: LaunchDarklyContextPro
 
   useEffect(() => {
     let isMounted = true;
-    
+  
     const initializeLD = async () => {
       setIsLoading(true);
-      
+  
       try {
-        // Configure user context for LaunchDarkly - with fallback
         const userContext = user
           ? {
               kind: "user",
@@ -32,9 +31,9 @@ export default function LaunchDarklyContext({ children }: LaunchDarklyContextPro
           : { 
               kind: "anonymous", 
               key: "anonymous-user-" + Date.now().toString(),
-              anonymous: true
+              anonymous: true,
             };
-            
+  
         const LDProvider = await asyncWithLDProvider({
           clientSideID,
           context: userContext,
@@ -45,7 +44,7 @@ export default function LaunchDarklyContext({ children }: LaunchDarklyContextPro
             diagnosticOptOut: false,
           },
         });
-
+  
         if (isMounted) {
           setLDProvider(() => LDProvider);
           setIsLoading(false);
@@ -57,13 +56,14 @@ export default function LaunchDarklyContext({ children }: LaunchDarklyContextPro
         }
       }
     };
-
+  
     initializeLD();
-    
+  
     return () => {
       isMounted = false;
     };
-  }, [user?.name, user?.group]); 
+  }, [user]);
+  
 
   if (isLoading || !LDProvider) {
     return <div className="flex items-center justify-center p-4">Loading feature flags...</div>;
