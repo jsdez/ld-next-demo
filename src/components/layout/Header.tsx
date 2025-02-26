@@ -98,7 +98,7 @@ export default function Header() {
               height={48}
             />
           ) : (
-            <div style={{ width: 220, height: 48 }} />
+            <div/>
           )}
         </div>
 
