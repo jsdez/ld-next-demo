@@ -42,6 +42,7 @@ export default function LaunchDarklyContext({ children }: LaunchDarklyContextPro
             bootstrap: "localStorage",
             streaming: true,
             sendEvents: true,
+            diagnosticOptOut: false,
           },
         });
 
