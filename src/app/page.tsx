@@ -4,7 +4,6 @@
 
 import { useUserContext } from "../context/UserContext";
 import ProductCard_03 from "@/components/commerce-ui/product-cards-03";
-import ProductCard_01 from "@/components/commerce-ui/product-cards-01";
 import Chatbot from "@/components/features/chatbot/Chatbot";
 import { useFlags } from "launchdarkly-react-client-sdk";
 import { useLaunchDarklyIdentify } from "@/hooks/useLaunchDarklyIdentify";
