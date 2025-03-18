@@ -2,6 +2,13 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
+// List of random user names
+const randomNames = [
+  "Oliver", "Harry", "George", "Charlie", "Jack", "Alfie", "Henry", "Freddie", "Oscar", "Archie",
+  "Amelia", "Olivia", "Isla", "Ava", "Emily", "Poppy", "Sophie", "Lily", "Jessica", "Florence"
+];
+
+
 interface User {
   name: string;
   group: "admin" | "user";
@@ -11,23 +18,24 @@ interface UserContextType {
   user: User | null;
   login: (name: string, group: "admin" | "user") => void;
   logout: () => void;
-  isLoading: boolean; // Add loading state
+  isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Track if we're still loading user data
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Safely access localStorage only on client side
   useEffect(() => {
-    // Only run on client
     setIsLoading(true);
     try {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser: User = JSON.parse(storedUser);
+        if (parsedUser.group === "admin") {
+          setUser(parsedUser); // Keep stored admin user
+        }
       }
     } catch (e) {
       console.error("Failed to parse stored user:", e);
@@ -37,19 +45,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const generateRandomName = (): string => {
+    return randomNames[Math.floor(Math.random() * randomNames.length)];
+  };
+
   const login = (name: string, group: "admin" | "user") => {
-    const newUser = { name, group };
+    const newUser = group === "admin" ? { name, group } : { name: generateRandomName(), group };
     setUser(newUser);
-    // Safely access localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("user", JSON.stringify(newUser));
+
+    if (group === "admin" && typeof window !== 'undefined') {
+      localStorage.setItem("user", JSON.stringify(newUser)); // Store only admin users
     }
-    console.log(`User logged in: ${name} (${group})`);
+
+    console.log(`User logged in: ${newUser.name} (${group})`);
   };
 
   const logout = () => {
     setUser(null);
-    // Safely access localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem("user");
     }

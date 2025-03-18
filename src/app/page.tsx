@@ -1,21 +1,37 @@
-//page.tsx
-
 "use client";
 
 import { useUserContext } from "../context/UserContext";
 import ProductCard_03 from "@/components/commerce-ui/product-cards-03";
 import Chatbot from "@/components/features/chatbot/Chatbot";
-import { useFlags } from "launchdarkly-react-client-sdk";
+import { useFlags, useLDClient } from "launchdarkly-react-client-sdk";
 import { useLaunchDarklyIdentify } from "@/hooks/useLaunchDarklyIdentify";
 import { Toaster, toast } from "sonner"; // Install with `npm install sonner`
 
 export default function Home() {
   const { user } = useUserContext();
-  const { enableChatbot } = useFlags();
+  const { enableChatbot, discount_percentage, discountPercentage } = useFlags(); // Try both flag names
+  const ldClient = useLDClient();
   useLaunchDarklyIdentify();
 
+  // Debugging: Log to check if the flag is retrieved correctly
+  console.log("LaunchDarkly discount flags:", { discount_percentage, discountPercentage });
+
+  // Ensure the discount is a valid number, default to 0% if undefined
+  const discount =
+    typeof discount_percentage === "number"
+      ? discount_percentage
+      : typeof discountPercentage === "number"
+      ? discountPercentage
+      : 0;
+
   const handleAddToCart = (productName: string) => {
-    toast.success(`${productName} added to cart!`);
+    // Show success toast
+    toast.success(`${productName} added to cart with ${discount}% discount!`);
+
+    // Send event to LaunchDarkly
+    if (ldClient) {
+      ldClient.track("added-to-cart", { productName, discountPercentage: discount });
+    }
   };
 
   if (!user) {
@@ -38,13 +54,13 @@ export default function Home() {
 
       {/* Product Cards Section */}
       <section className="mt-8 p-4 rounded-lg max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Discounted Products */}
+        {/* Apply feature flag discount dynamically */}
         <ProductCard_03 
           productName="Gaming Headphones" 
           tagText="EXCLUSIVE"
           imageUrl="https://raw.githubusercontent.com/stackzero-labs/ui/refs/heads/main/public/placeholders/headphone-1.jpg"
           originalPrice={199}
-          discountPercentage={25}
+          discountPercentage={discount} // Use feature flag discount
           onAddToCart={() => handleAddToCart("Gaming Headphones")}
         />
         <ProductCard_03 
@@ -52,7 +68,7 @@ export default function Home() {
           tagText="LOW STOCK"
           imageUrl="https://raw.githubusercontent.com/stackzero-labs/ui/refs/heads/main/public/placeholders/headphone-2.jpg"
           originalPrice={99}
-          discountPercentage={25}
+          discountPercentage={discount} // Use feature flag discount
           onAddToCart={() => handleAddToCart("Wired Headphones")}
         />
         <ProductCard_03 
@@ -60,8 +76,8 @@ export default function Home() {
           tagText="NEW IN"
           imageUrl="https://raw.githubusercontent.com/stackzero-labs/ui/refs/heads/main/public/placeholders/headphone-3.jpg"
           originalPrice={250}
-          discountPercentage={25}
-          onAddToCart={() => handleAddToCart("Wired Headphones")}
+          discountPercentage={discount} // Use feature flag discount
+          onAddToCart={() => handleAddToCart("Wireless Headphones")}
         />
       </section>
 
